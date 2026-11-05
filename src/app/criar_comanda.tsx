@@ -23,8 +23,7 @@ export default function CriarComanda() {
           borderRadius: 8
         }}
       />
-
-      // Chama a função que avisa o index.tsx para mudar de tela
+      
       <Button 
         title="Voltar para a Lista" 
         onPress={() => router.back()} // Volta para a tela anterior
