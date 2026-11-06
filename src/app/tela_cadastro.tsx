@@ -25,13 +25,36 @@ export default function TelaCadastro() {
 
 
     return (
-        <View>
-            <Text>Cadastro</Text>
+        <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 12
+    }}>
+            <Text style={{
+                fontSize: 28,
+                fontWeight: 'bold',
+                color: '#222',
+                marginBottom: 8
+                }}>
+                Criar conta
+                 </Text>
+                
+                <Text style={{
+                    fontSize: 14,
+                    color: '#777',
+                    marginBottom: 15
+                }}>
+                    Preencha seus dados para começar
+                    </Text>
+
 
             <TextInput
                 placeholder="Nome"
                 value={nome}
                 onChangeText={setNome}
+                style={{ borderWidth: 2, width: '90%', padding: 10 }}
+                placeholderTextColor="#777"
             />
 
             <TextInput
@@ -40,6 +63,8 @@ export default function TelaCadastro() {
             onChangeText={setEmail}
             keyboardType='email-address'
             autoCapitalize="none"
+            style={{ borderWidth: 2, width: '90%', padding: 10 }}
+            placeholderTextColor="#777"
             />
 
             <TextInput 
@@ -47,6 +72,8 @@ export default function TelaCadastro() {
             value={senha}
             onChangeText={setSenha}
             secureTextEntry={true}
+            style={{ borderWidth: 2, width: '90%', padding: 10 }}
+            placeholderTextColor="#777"
             />
 
             <TextInput
@@ -54,6 +81,8 @@ export default function TelaCadastro() {
             value={confirmarSenha}
             onChangeText={setConfirmarSenha}
             secureTextEntry={true}
+            style={{ borderWidth: 2, width: '90%', padding: 10 }}
+            placeholderTextColor="#777"
             />
             
             <Button title='Cadastrar' onPress={handleCadastro} />

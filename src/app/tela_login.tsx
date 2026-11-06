@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
-export default function TelaLogin({ onLogin }: { onLogin: () => void }) {
+export default function TelaLogin({ onLogin, onCadastro }: { onLogin: () => void; onCadastro: () => void; }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -39,7 +39,7 @@ export default function TelaLogin({ onLogin }: { onLogin: () => void }) {
 
       <View style={styles.botoes}>
         <Button title="Entrar" onPress={handleLogin} />
-        <Button title="Cadastro" onPress={() => {}} />
+        <Button title="Cadastro" onPress={onCadastro} />
       </View>
     </View>
   );

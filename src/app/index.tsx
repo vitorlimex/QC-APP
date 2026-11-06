@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import TelaInicial from './tela_inicial';
 import TelaLogin from './tela_login';
+import TelaCadastro from './tela_cadastro';
 
 export default function App() {
-  const [logado, setLogado] = useState(false);
+  const [tela, setTela] = useState ('Login');
 
-  if (!logado) {
-    return <TelaLogin onLogin={() => setLogado(true)} />;
+  if(tela === 'Login') {
+    return (
+    <TelaLogin onLogin={() => setTela('inicial')}
+                onCadastro={() => setTela('cadastro')} />
+                                                     
+    );
   }
-  return <TelaInicial onSair={() => setLogado(false)} />;
+
+  if (tela === 'cadastro') {
+    return <TelaCadastro/>;
+  }
+  
+  return <TelaInicial onSair={() => setTela('Login')} />;
 }
