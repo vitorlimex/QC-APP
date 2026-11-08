@@ -1,33 +1,21 @@
-import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
-import { db } from "../services/firebaseConfig";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { buscarProdutos, Produto } from "../services/lista_produto";
 
-interface Produto {
-  id: string;
-  nome: string;
-  preco: number;
-}
-
-export default function App() {
+export default function ListaProdutos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [carregando, setCarregando] = useState<boolean>(true);
 
   useEffect(() => {
-    async function carregarDados() {
+    async function carregar() {
       try {
-        const querySnapshot = await getDocs(collection(db, "produtos"));
-        const lista: Produto[] = [];
-
-        querySnapshot.forEach((doc) => {
-          const dados = doc.data();
-          lista.push({
-            id: doc.id,
-            nome: dados.nome,
-            preco: dados.preco,
-          });
-        });
-
+        const lista = await buscarProdutos();
         setProdutos(lista);
       } catch (erro) {
         console.error("Erro ao buscar dados:", erro);
@@ -35,8 +23,7 @@ export default function App() {
         setCarregando(false);
       }
     }
-
-    carregarDados();
+    carregar();
   }, []);
 
   if (carregando) {
@@ -74,31 +61,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#fff",
   },
-  centro: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  item: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  textoNome: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  textoPreco: {
-    fontSize: 14,
-    color: "green",
-  },
-  textoId: {
-    fontSize: 12,
-    color: "#666",
-  },
+  centro: { flex: 1, justifyContent: "center", alignItems: "center" },
+  titulo: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
+  item: { padding: 12, borderBottomWidth: 1, borderBottomColor: "#ccc" },
+  textoNome: { fontSize: 16, fontWeight: "600" },
+  textoPreco: { fontSize: 14, color: "green" },
+  textoId: { fontSize: 12, color: "#666" },
 });

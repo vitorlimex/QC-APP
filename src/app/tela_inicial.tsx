@@ -42,7 +42,7 @@ export default function TelaInicial({ onSair }: { onSair: () => void }) {
 
       <Button 
         title="+ Nova Comanda" 
-        onPress={() => router.push('/testefirebase')} 
+        onPress={() => router.push('/teste_produto')} 
       />
     </View>
   );
