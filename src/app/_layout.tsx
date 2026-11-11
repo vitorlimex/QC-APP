@@ -1,15 +1,17 @@
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { ComandasProvider } from '../context/ComandasContext';
 
 export default function RootLayout() {
   return (
     <ThemeProvider value={DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="tela_login" />
-        <Stack.Screen name="tela_inicial" />
-        <Stack.Screen name="criar_comanda" />
-        <Stack.Screen name="teste_produto" />
-      </Stack>
+      <ComandasProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="selecionar_produtos"
+            options={{ presentation: 'modal' }}
+          />
+        </Stack>
+      </ComandasProvider>
     </ThemeProvider>
   );
 }
