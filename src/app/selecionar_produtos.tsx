@@ -1,11 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { ItemComanda, useComandas } from '../context/ComandasContext';
 import { buscarProdutos, Produto } from '../services/lista_produto';
 
 export default function SelecionarProdutos() {
-  // Recebe a mesa (para nova comanda) OU o comandaId (para adicionar itens)
   const { mesa, comandaId } = useLocalSearchParams<{ mesa?: string; comandaId?: string }>();
   const router = useRouter();
   const { comandas, adicionarComanda, atualizarComanda } = useComandas();
@@ -45,26 +44,23 @@ export default function SelecionarProdutos() {
 
     try {
       if (comandaId) {
-        // MODO: Adicionar itens a uma comanda existente
         const comandaExistente = comandas.find(c => c.id === comandaId);
         if (!comandaExistente) throw new Error('Comanda não encontrada');
 
-        // Mescla os itens novos com os antigos
         const itensAtualizados = [...comandaExistente.itens];
-        
+
         itensNovos.forEach(novoItem => {
           const index = itensAtualizados.findIndex(i => i.produtoId === novoItem.produtoId);
           if (index >= 0) {
-            itensAtualizados[index].quantidade += novoItem.quantidade; // Se já existe, soma a quantidade
+            itensAtualizados[index].quantidade += novoItem.quantidade;
           } else {
-            itensAtualizados.push(novoItem); // Se não existe, adiciona
+            itensAtualizados.push(novoItem);
           }
         });
 
         await atualizarComanda(comandaId, itensAtualizados);
-        router.back(); // Fecha o modal
+        router.back();
       } else {
-        // MODO: Criar nova comanda
         await adicionarComanda({
           mesa: mesa ?? '?',
           itens: itensNovos,
@@ -103,16 +99,74 @@ export default function SelecionarProdutos() {
               <Text style={{ fontWeight: '600', fontSize: 16 }}>{item.nome}</Text>
               <Text style={{ color: 'green' }}>R$ {item.preco.toFixed(2)}</Text>
             </View>
-            <Button title="-" onPress={() => alterar(item.id, -1)} />
-            <Text style={{ marginHorizontal: 12, fontSize: 18 }}>{quantidades[item.id] ?? 0}</Text>
-            <Button title="+" onPress={() => alterar(item.id, 1)} />
+
+            {/* Botão - */}
+            <Pressable
+              onPress={() => alterar(item.id, -1)}
+              style={({ pressed }) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: pressed ? '#ccc' : '#e5e5e5',
+                justifyContent: 'center',
+                alignItems: 'center',
+              })}
+            >
+              <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#333' }}>−</Text>
+            </Pressable>
+
+            <Text style={{ marginHorizontal: 12, fontSize: 18, minWidth: 24, textAlign: 'center' }}>
+              {quantidades[item.id] ?? 0}
+            </Text>
+
+            {/* Botão + */}
+            <Pressable
+              onPress={() => alterar(item.id, 1)}
+              style={({ pressed }) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: pressed ? '#005fcc' : '#007AFF',
+                justifyContent: 'center',
+                alignItems: 'center',
+              })}
+            >
+              <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#fff' }}>+</Text>
+            </Pressable>
           </View>
         )}
       />
 
       <View style={{ marginVertical: 20, gap: 10 }}>
-        <Button title={comandaId ? "Adicionar à Comanda" : "Confirmar Comanda"} onPress={confirmar} />
-        <Button title="Cancelar" color="red" onPress={() => router.back()} />
+        {/* Confirmar */}
+        <Pressable
+          onPress={confirmar}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#1e7e34' : '#28a745',
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+          })}
+        >
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+            {comandaId ? 'Adicionar à Comanda' : 'Confirmar Comanda'}
+          </Text>
+        </Pressable>
+
+        {/* Cancelar */}
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#a00' : 'red',
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+          })}
+        >
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+            Cancelar
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
