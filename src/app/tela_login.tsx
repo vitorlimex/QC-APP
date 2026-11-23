@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, Image, StyleSheet, Text, TextInput, View, Alert } from "react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
 
 export default function TelaLogin({
   onLogin,
@@ -10,21 +12,28 @@ export default function TelaLogin({
 }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleLogin() {
-    // trocar esse trecho por uma validação real de login, (firebase ou supabase?)
+  async function handleLogin() {
     if (!email || !senha) {
       alert("Preencha e-mail e senha!");
       return;
     }
 
-    // Chama a função que avisa o index.tsx para mudar de tela
-    onLogin();
+    try {
+      setCarregando(true);
+      await signInWithEmailAndPassword(auth, email, senha);
+      onLogin(); 
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert("Erro ao entrar", "E-mail ou senha inválidos.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
     <View style={styles.container}>
-      
       <Image
         source={require("../../assets/images/logo.png")}
         style={{ width: 300, height: 250 }}
@@ -38,6 +47,7 @@ export default function TelaLogin({
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
+        placeholderTextColor="#777"
       />
 
       <TextInput
@@ -46,10 +56,15 @@ export default function TelaLogin({
         value={senha}
         onChangeText={setSenha}
         secureTextEntry
+        placeholderTextColor="#777"
       />
 
       <View style={styles.botoes}>
-        <Button title="Entrar" onPress={handleLogin} />
+        <Button 
+          title={carregando ? "Entrando..." : "Entrar"} 
+          onPress={handleLogin} 
+          disabled={carregando} 
+        />
         <Button title="Cadastro" onPress={onCadastro} />
       </View>
     </View>
@@ -64,14 +79,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
   },
-  titulo: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 16,
-    textAlign: "center",
-  },
   input: {
     borderWidth: 2,
+    borderColor: "#ccc",
     borderRadius: 8,
     width: "90%",
     paddingHorizontal: 10,
