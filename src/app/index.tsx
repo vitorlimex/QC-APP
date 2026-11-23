@@ -19,5 +19,5 @@ export default function App() {
     return <TelaCadastro onVoltar={() => setTela("Login")} />;
   }
 
-  return <TelaInicial onSair={() => setTela("Login")} />;
+  return <TelaInicial />;
 }
