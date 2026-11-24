@@ -72,13 +72,12 @@ export default function TelaLogin({
         style={styles.input}
         value={senha}
         onChangeText={setSenha}
-        secureTextEntry
+        secureTextEntry 
       />
 
       <View style={styles.botoes}>
         <Button title="Entrar" onPress={handleLogin} />
         <Button title="Cadastro" onPress={onCadastro} />
-        <Button title="Testar Biometria" onPress={handleTesteBiometria} />
       </View>
     </View>
   );
