@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, Image, StyleSheet, Text, TextInput, View, Pressable } from "react-native";
 import { verificarBiometria, verificarBiometriaCadastrada, autenticarBiometria } from "@/services/biometria";
-
+import { Ionicons } from '@expo/vector-icons';
 export default function TelaLogin({
   onLogin,
   onCadastro,
@@ -11,6 +11,7 @@ export default function TelaLogin({
 }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   function handleLogin() {
     // trocar esse trecho por uma validação real de login, (firebase ou supabase?)
@@ -46,9 +47,6 @@ export default function TelaLogin({
     }
   }
 
-
-
-
   return (
     <View style={styles.container}>
       
@@ -60,6 +58,7 @@ export default function TelaLogin({
 
       <TextInput
         placeholder="Email"
+        placeholderTextColor={"#000000"}
         style={styles.input}
         value={email}
         onChangeText={setEmail}
@@ -67,13 +66,26 @@ export default function TelaLogin({
         keyboardType="email-address"
       />
 
+    <View style={styles.containerSenha}>
       <TextInput
         placeholder="Senha"
-        style={styles.input}
+        placeholderTextColor={"#000000"}
+        style={[styles.input, {paddingRight: 45, width: '100%'}]}
         value={senha}
         onChangeText={setSenha}
-        secureTextEntry 
+        secureTextEntry={!mostrarSenha}
       />
+
+      <Pressable 
+      style={styles.botaoOlho}
+      onPress={() => setMostrarSenha(!mostrarSenha)}>
+      <Ionicons
+        name={mostrarSenha ? "eye-off" : "eye"}
+        size={24}
+        color="#000"
+        />
+      </Pressable>
+      </View>
 
       <View style={styles.botoes}>
         <Button title="Entrar" onPress={handleLogin} />
@@ -105,4 +117,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   botoes: { width: "90%", gap: 8, marginTop: 10 },
+
+  containerSenha: {
+    position: 'relative',
+    width: '90%',
+    justifyContent: 'center',
+  },
+
+  botaoOlho: {
+    position: 'absolute',
+    right: 15,
+  },
+
 });
