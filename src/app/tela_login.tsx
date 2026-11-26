@@ -1,7 +1,23 @@
 import { useState } from "react";
-import { Image, StyleSheet,  Text, TextInput, View, Pressable,} from "react-native";
-import { verificarBiometria, verificarBiometriaCadastrada, autenticarBiometria,} from "@/services/biometria";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Pressable,
+  Alert,
+} from "react-native";
+
+import {
+  verificarBiometria,
+  verificarBiometriaCadastrada,
+  autenticarBiometria,
+} from "@/services/biometria";
+
 import { Ionicons } from "@expo/vector-icons";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
 
 export default function TelaLogin({
   onLogin,
@@ -13,17 +29,36 @@ export default function TelaLogin({
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
-  function handleLogin() {
-    // Trocar esse trecho por uma validação real de login
+  // Autenticação com Firebase
+  async function handleLogin() {
+    if (carregando) return;
+
     if (!email || !senha) {
       alert("Preencha e-mail e senha!");
       return;
     }
 
-    onLogin();
+    try {
+      setCarregando(true);
+
+      await signInWithEmailAndPassword(auth, email, senha);
+
+      onLogin();
+    } catch (error) {
+      console.error(error);
+
+      Alert.alert(
+        "Erro ao entrar",
+        "E-mail ou senha inválidos."
+      );
+    } finally {
+      setCarregando(false);
+    }
   }
 
+  // Teste de autenticação biométrica
   async function handleTesteBiometria() {
     const temSensor = await verificarBiometria();
     const cadastrada = await verificarBiometriaCadastrada();
@@ -91,25 +126,31 @@ export default function TelaLogin({
 
       <View style={styles.botoes}>
 
+        {/* Botão Entrar */}
         <Pressable
           onPress={handleLogin}
+          disabled={carregando}
           style={({ pressed }) => [
             styles.botao,
             styles.botaoEntrar,
             pressed && styles.botaoPressionado,
+            carregando && styles.botaoDesabilitado,
           ]}
         >
           <Text style={styles.textoEntrar}>
-            Entrar
+            {carregando ? "Entrando..." : "Entrar"}
           </Text>
         </Pressable>
 
+        {/* Botão Cadastro */}
         <Pressable
           onPress={onCadastro}
+          disabled={carregando}
           style={({ pressed }) => [
             styles.botao,
             styles.botaoCadastro,
             pressed && styles.botaoPressionado,
+            carregando && styles.botaoDesabilitado,
           ]}
         >
           <Text style={styles.textoCadastro}>
@@ -197,5 +238,9 @@ const styles = StyleSheet.create({
 
   botaoPressionado: {
     opacity: 0.75,
+  },
+
+  botaoDesabilitado: {
+    opacity: 0.5,
   },
 });

@@ -1,7 +1,20 @@
 import { useState } from "react";
-import {StyleSheet, Text, TextInput, View, Pressable,} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Pressable,
+  Alert,
+} from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+
+import { auth } from "../services/firebaseConfig";
 
 export default function TelaCadastro({
   onVoltar,
@@ -15,10 +28,12 @@ export default function TelaCadastro({
 
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
-  // Verifica se todos os campos foram preenchidos
-  // e se as senhas são iguais
-  function handleCadastro() {
+  // Validação dos campos e cadastro no Firebase
+  async function handleCadastro() {
+    if (carregando) return;
+
     if (!nome || !email || !senha || !confirmarSenha) {
       alert("Preencha todos os campos!");
       return;
@@ -29,7 +44,40 @@ export default function TelaCadastro({
       return;
     }
 
-    alert("Senhas iguais!");
+    try {
+      setCarregando(true);
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        senha
+      );
+
+      // Salva o nome do usuário no perfil do Firebase
+      await updateProfile(userCredential.user, {
+        displayName: nome,
+      });
+
+      Alert.alert("Sucesso!", "Conta criada com sucesso!");
+
+      onVoltar();
+
+    } catch (error: any) {
+      console.error(error);
+
+      let mensagemErro = "Não foi possível realizar o cadastro.";
+
+      if (error.code === "auth/email-already-in-use") {
+        mensagemErro = "Este e-mail já está em uso.";
+      } else if (error.code === "auth/weak-password") {
+        mensagemErro = "A senha deve ter pelo menos 6 caracteres.";
+      }
+
+      Alert.alert("Erro no Cadastro", mensagemErro);
+
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -61,6 +109,7 @@ export default function TelaCadastro({
         placeholderTextColor="#795024"
       />
 
+      {/* Campo de senha */}
       <View style={styles.containerSenha}>
         <TextInput
           placeholder="Senha"
@@ -89,6 +138,7 @@ export default function TelaCadastro({
         </Pressable>
       </View>
 
+      {/* Campo de confirmação de senha */}
       <View style={styles.containerSenha}>
         <TextInput
           placeholder="Confirmar senha"
@@ -123,25 +173,31 @@ export default function TelaCadastro({
 
       <View style={styles.botoes}>
 
+        {/* Botão Cadastrar */}
         <Pressable
           onPress={handleCadastro}
+          disabled={carregando}
           style={({ pressed }) => [
             styles.botao,
             styles.botaoCadastrar,
             pressed && styles.botaoPressionado,
+            carregando && styles.botaoDesabilitado,
           ]}
         >
           <Text style={styles.textoCadastrar}>
-            Cadastrar
+            {carregando ? "Cadastrando..." : "Cadastrar"}
           </Text>
         </Pressable>
 
+        {/* Botão Voltar */}
         <Pressable
           onPress={onVoltar}
+          disabled={carregando}
           style={({ pressed }) => [
             styles.botao,
             styles.botaoVoltar,
             pressed && styles.botaoPressionado,
+            carregando && styles.botaoDesabilitado,
           ]}
         >
           <Text style={styles.textoVoltar}>
@@ -237,5 +293,9 @@ const styles = StyleSheet.create({
 
   botaoPressionado: {
     opacity: 0.75,
+  },
+
+  botaoDesabilitado: {
+    opacity: 0.5,
   },
 });
