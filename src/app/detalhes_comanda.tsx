@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, FlatList, Pressable, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View,} from 'react-native';
 import { useComandas } from '../context/ComandasContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function DetalhesComanda() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -9,33 +10,55 @@ export default function DetalhesComanda() {
 
   const comanda = comandas.find(c => c.id === id);
 
+  // Verifica se a comanda existe
   if (!comanda) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>
-          Comanda não encontrada (pode ter sido encerrada).
+      <View style={styles.containerNaoEncontrada}>
+
+        <Ionicons
+          name="receipt-outline"
+          size={64}
+          color="#795024"
+        />
+
+        <Text style={styles.tituloNaoEncontrada}>
+          Comanda não encontrada
         </Text>
+
+        <Text style={styles.textoNaoEncontrada}>
+          Esta comanda pode ter sido encerrada.
+        </Text>
+
         <Pressable
           onPress={() => router.back()}
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? '#555' : '#888',
-            paddingVertical: 14,
-            paddingHorizontal: 32,
-            borderRadius: 12,
-            alignItems: 'center',
-          })}
+          style={({ pressed }) => [
+            styles.botao,
+            styles.botaoVoltar,
+            pressed && styles.botaoPressionado,
+          ]}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Voltar</Text>
+          <Ionicons
+            name="arrow-back-outline"
+            size={22}
+            color="#795024"
+          />
+
+          <Text style={styles.textoVoltar}>
+            Voltar
+          </Text>
         </Pressable>
+
       </View>
     );
   }
 
+  // Calcula o valor total da comanda
   const totalComanda = comanda.itens.reduce(
     (soma, item) => soma + item.preco * item.quantidade,
     0
   );
 
+  // Solicita confirmação antes de encerrar a comanda
   const encerrarComanda = () => {
     Alert.alert(
       'Encerrar Comanda',
@@ -51,7 +74,10 @@ export default function DetalhesComanda() {
               router.back();
             } catch (erro) {
               console.error(erro);
-              Alert.alert('Erro', 'Não foi possível encerrar a comanda.');
+              Alert.alert(
+                'Erro',
+                'Não foi possível encerrar a comanda.'
+              );
             }
           },
         },
@@ -60,50 +86,85 @@ export default function DetalhesComanda() {
   };
 
   return (
-    <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
-        Mesa {comanda.mesa}
-      </Text>
+    <View style={styles.container}>
 
+      {/* Cabeçalho */}
+      <View style={styles.cabecalho}>
+        <View style={styles.infoCabecalho}>
+          <Text style={styles.titulo}>
+            Mesa {comanda.mesa}
+          </Text>
+
+          <Text style={styles.subtitulo}>
+            Detalhes da comanda
+          </Text>
+        </View>
+
+        <Ionicons
+          name="receipt-outline"
+          size={40}
+          color="#795024"
+        />
+      </View>
+
+      {/* Lista de produtos da comanda */}
       <FlatList
         data={comanda.itens}
         keyExtractor={item => item.produtoId}
-        ListEmptyComponent={<Text>Nenhum item adicionado.</Text>}
+        showsVerticalScrollIndicator={false}
+
+        ListEmptyComponent={
+          <Text style={styles.listaVazia}>
+            Nenhum item adicionado.
+          </Text>
+        }
+
         renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              paddingVertical: 10,
-              borderBottomWidth: 1,
-              borderBottomColor: '#eee',
-            }}
-          >
-            <Text style={{ fontSize: 16 }}>
-              {item.quantidade}x {item.nome}
+          <View style={styles.cardProduto}>
+
+            {/* Quantidade do produto */}
+            <View style={styles.containerQuantidade}>
+              <Text style={styles.quantidade}>
+                {item.quantidade}x
+              </Text>
+            </View>
+
+            {/* Nome e preço unitário */}
+            <View style={styles.infoProduto}>
+              <Text style={styles.nomeProduto}>
+                {item.nome}
+              </Text>
+
+              <Text style={styles.precoUnitario}>
+                R$ {item.preco.toFixed(2).replace('.', ',')} / un.
+              </Text>
+            </View>
+
+            {/* Valor total do produto */}
+            <Text style={styles.valorProduto}>
+              R$ {(item.preco * item.quantidade)
+                .toFixed(2)
+                .replace('.', ',')}
             </Text>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-              R$ {(item.preco * item.quantidade).toFixed(2)}
-            </Text>
+
           </View>
         )}
       />
 
-      <View
-        style={{
-          borderTopWidth: 2,
-          borderTopColor: '#000',
-          paddingVertical: 15,
-          marginTop: 10,
-        }}
-      >
-        <Text style={{ fontSize: 22, fontWeight: 'bold', textAlign: 'right' }}>
-          Total: R$ {totalComanda.toFixed(2)}
+      {/* Valor total da comanda */}
+      <View style={styles.resumo}>
+        <Text style={styles.labelTotal}>
+          Total da comanda
+        </Text>
+
+        <Text style={styles.valorTotal}>
+          R$ {totalComanda.toFixed(2).replace('.', ',')}
         </Text>
       </View>
 
-      <View style={{ gap: 10, marginTop: 10, marginBottom: 20 }}>
-        {/* Adicionar Item — azul (ação principal) */}
+      <View style={styles.botoes}>
+
+        {/* Botão Adicionar Item */}
         <Pressable
           onPress={() =>
             router.push({
@@ -111,46 +172,253 @@ export default function DetalhesComanda() {
               params: { comandaId: comanda.id },
             })
           }
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? '#005fcc' : '#007AFF',
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
-          })}
+          style={({ pressed }) => [
+            styles.botao,
+            styles.botaoAdicionar,
+            pressed && styles.botaoPressionado,
+          ]}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
-            + Adicionar Item
+          <Ionicons
+            name="add-circle-outline"
+            size={22}
+            color="#21170D"
+          />
+
+          <Text style={styles.textoAdicionar}>
+            Adicionar Item
           </Text>
         </Pressable>
 
+        {/* Botão Encerrar Comanda */}
         <Pressable
           onPress={encerrarComanda}
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? '#a00' : 'red',
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
-          })}
+          style={({ pressed }) => [
+            styles.botao,
+            styles.botaoEncerrar,
+            pressed && styles.botaoPressionado,
+          ]}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+          <Ionicons
+            name="checkmark-circle-outline"
+            size={22}
+            color="#FFFFFF"
+          />
+
+          <Text style={styles.textoEncerrar}>
             Encerrar Comanda
           </Text>
         </Pressable>
 
+        {/* Botão Voltar */}
         <Pressable
           onPress={() => router.back()}
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? '#555' : '#888',
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
-          })}
+          style={({ pressed }) => [
+            styles.botao,
+            styles.botaoVoltar,
+            pressed && styles.botaoPressionado,
+          ]}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+          <Ionicons
+            name="arrow-back-outline"
+            size={22}
+            color="#795024"
+          />
+
+          <Text style={styles.textoVoltar}>
             Voltar
           </Text>
         </Pressable>
+
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF8E7',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+
+  cabecalho: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+    gap: 12,
+  },
+
+  infoCabecalho: {
+    flex: 1,
+  },
+
+  titulo: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#21170D',
+  },
+
+  subtitulo: {
+    fontSize: 14,
+    color: '#795024',
+    marginTop: 5,
+  },
+
+  cardProduto: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#795024',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  containerQuantidade: {
+    minWidth: 40,
+    height: 40,
+    paddingHorizontal: 6,
+    backgroundColor: '#F3E6CD',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  quantidade: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#795024',
+  },
+
+  infoProduto: {
+    flex: 1,
+  },
+
+  nomeProduto: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#21170D',
+  },
+
+  precoUnitario: {
+    fontSize: 12,
+    color: '#795024',
+    marginTop: 5,
+  },
+
+  valorProduto: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#21170D',
+  },
+
+  listaVazia: {
+    fontSize: 16,
+    color: '#795024',
+    textAlign: 'center',
+    marginTop: 30,
+  },
+
+  resumo: {
+    backgroundColor: '#F3E6CD',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  labelTotal: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#795024',
+    flex: 1,
+  },
+
+  valorTotal: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#21170D',
+  },
+
+  botoes: {
+    gap: 12,
+    marginTop: 16,
+  },
+
+  botao: {
+    width: '100%',
+    height: 52,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  botaoAdicionar: {
+    backgroundColor: '#D4AF37',
+  },
+
+  botaoEncerrar: {
+    backgroundColor: '#A63232',
+  },
+
+  botaoVoltar: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#795024',
+  },
+
+  textoAdicionar: {
+    color: '#21170D',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  textoEncerrar: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  textoVoltar: {
+    color: '#795024',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  botaoPressionado: {
+    opacity: 0.75,
+  },
+
+  containerNaoEncontrada: {
+    flex: 1,
+    backgroundColor: '#FFF8E7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    gap: 16,
+  },
+
+  tituloNaoEncontrada: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#21170D',
+    textAlign: 'center',
+  },
+
+  textoNaoEncontrada: {
+    fontSize: 16,
+    color: '#795024',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+});
