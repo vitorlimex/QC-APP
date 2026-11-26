@@ -1,4 +1,4 @@
-// Teste Unitário: Validação de regras de cadastro e login
+// Teste Unitario: Validação de regras de cadastro e login
 describe("Testes Unitários de Validação", () => {
   
   it("deve validar se a senha possui o tamanho mínimo exigido pelo Firebase (6 caracteres)", () => {

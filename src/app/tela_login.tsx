@@ -48,7 +48,7 @@ export default function TelaLogin({
 
       onLogin();
     } catch (error: any) {
-      // Usamos console.log em vez de console.error para evitar o banner vermelho do Expo
+      // usei console.log em vez de console.error para nao ficar aquela caixinha vermelha de error da expo
       console.log(error);
 
       let mensagemErro = "Não foi possível realizar o login. Verifique seus dados.";
