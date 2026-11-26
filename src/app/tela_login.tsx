@@ -1,18 +1,17 @@
 import { useState } from "react";
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  View,
-  Pressable,
-  Alert,
+  View
 } from "react-native";
 
 import {
+  autenticarBiometria,
   verificarBiometria,
   verificarBiometriaCadastrada,
-  autenticarBiometria,
 } from "@/services/biometria";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -30,13 +29,15 @@ export default function TelaLogin({
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
 
   // Autenticação com Firebase
   async function handleLogin() {
     if (carregando) return;
+    setErro("");
 
     if (!email || !senha) {
-      alert("Preencha e-mail e senha!");
+      setErro("Preencha e-mail e senha!");
       return;
     }
 
@@ -46,13 +47,28 @@ export default function TelaLogin({
       await signInWithEmailAndPassword(auth, email, senha);
 
       onLogin();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      // usei console.log em vez de console.error para nao ficar aquela caixinha vermelha de error da expo
+      console.log(error);
 
-      Alert.alert(
-        "Erro ao entrar",
-        "E-mail ou senha inválidos."
-      );
+      let mensagemErro = "Não foi possível realizar o login. Verifique seus dados.";
+      const errorCode = error?.code;
+
+      if (
+        errorCode === "auth/invalid-credential" ||
+        errorCode === "auth/user-not-found" ||
+        errorCode === "auth/wrong-password"
+      ) {
+        mensagemErro = "E-mail ou senha incorretos.";
+      } else if (errorCode === "auth/invalid-email") {
+        mensagemErro = "O formato do e-mail é inválido.";
+      } else if (errorCode === "auth/too-many-requests") {
+        mensagemErro = "Muitas tentativas malsucedidas. Tente mais tarde.";
+      } else if (errorCode === "auth/network-request-failed") {
+        mensagemErro = "Falha na conexão. Verifique sua internet.";
+      }
+
+      setErro(mensagemErro); // queria colocar um texto mais amigavel de error
     } finally {
       setCarregando(false);
     }
@@ -123,6 +139,8 @@ export default function TelaLogin({
           />
         </Pressable>
       </View>
+
+      {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
 
       <View style={styles.botoes}>
 
@@ -200,6 +218,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     padding: 4,
+  },
+
+  textoErro: {
+    color: "#B71C1C",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 5,
+    fontWeight: "600",
+    width: "90%",
   },
 
   botoes: {

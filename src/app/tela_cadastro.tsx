@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
+  Alert,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
-  Pressable,
-  Alert,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -29,18 +29,20 @@ export default function TelaCadastro({
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState(""); // <--- Estado de erro na tela
 
   // Validação dos campos e cadastro no Firebase
   async function handleCadastro() {
     if (carregando) return;
+    setErro(""); // Limpa o erro anterior
 
     if (!nome || !email || !senha || !confirmarSenha) {
-      alert("Preencha todos os campos!");
+      setErro("Preencha todos os campos!");
       return;
     }
 
     if (senha !== confirmarSenha) {
-      alert("As senhas não coincidem!");
+      setErro("As senhas não coincidem!");
       return;
     }
 
@@ -63,17 +65,23 @@ export default function TelaCadastro({
       onVoltar();
 
     } catch (error: any) {
-      console.error(error);
+      // Ussei console.log para poder evitar aquela caixinha vermelha de error da expo
+      console.log(error);
 
       let mensagemErro = "Não foi possível realizar o cadastro.";
+      const errorCode = error?.code;
 
-      if (error.code === "auth/email-already-in-use") {
-        mensagemErro = "Este e-mail já está em uso.";
-      } else if (error.code === "auth/weak-password") {
+      if (errorCode === "auth/email-already-in-use") {
+        mensagemErro = "Este e-mail já está em uso por outra conta.";
+      } else if (errorCode === "auth/weak-password") {
         mensagemErro = "A senha deve ter pelo menos 6 caracteres.";
+      } else if (errorCode === "auth/invalid-email") {
+        mensagemErro = "O formato do e-mail digitado é inválido.";
+      } else if (errorCode === "auth/network-request-failed") {
+        mensagemErro = "Falha na conexão. Verifique sua internet.";
       }
 
-      Alert.alert("Erro no Cadastro", mensagemErro);
+      setErro(mensagemErro); // aviso de error mais amigavel 
 
     } finally {
       setCarregando(false);
@@ -171,6 +179,9 @@ export default function TelaCadastro({
         </Pressable>
       </View>
 
+      {/* exibe o erro na tela se ele existir */}
+      {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
+
       <View style={styles.botoes}>
 
         {/* Botão Cadastrar */}
@@ -255,6 +266,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     padding: 4,
+  },
+
+  textoErro: {
+    color: "#B71C1C",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 5,
+    fontWeight: "600",
+    width: "90%",
   },
 
   botoes: {
