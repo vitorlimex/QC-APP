@@ -1,56 +1,145 @@
-# Welcome to your Expo app 👋
+# 🍺 Quarteto Choppastico — Gestor de Comandas
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Sobre o projeto
 
-## Get started
+O projeto foi desenvolvido como parte de uma atividade de extensão do curso de Ciência da Computação e Analise e Desenvolvimento de Sistemas da Universidade Estácio de Sá.
 
-1. Install dependencies
+O aplicativo tem como objetivo facilitar o gerenciamento de comandas de um grupo de empreendedores que trabalha com a venda de chopp em feiras e eventos, substituindo o controle manual por uma solução digital.
 
-   ```bash
-   npm install
-   ```
+Com o aplicativo, é possível organizar as comandas, identificar as mesas, adicionar produtos e calcular automaticamente o valor total dos pedidos, facilitando o atendimento e reduzindo erros de cálculo.
 
-2. Start the app
+## Funcionalidades
 
-   ```bash
-   npx expo start
-   ```
+- Cadastro e login de usuários com Firebase.
+- Mostrar e ocultar senha.
+- Visualização das comandas abertas.
+- Criação de comandas.
+- Identificação de mesas por QR Code ou digitação manual.
+- Seleção de produtos e quantidades.
+- Cálculo automático do valor total da comanda.
+- Adição de produtos em comandas abertas.
+- Encerramento de comandas.
+- Interface personalizada com as cores escolhidas pela parte interessada.
 
-In the output, you'll find options to open the app in a
+## Tecnologias utilizadas
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- React Native
+- TypeScript
+- Expo
+- Expo Router
+- Firebase Authentication
+- Cloud Firestore
+- Node.js
+- Git e GitHub
+- Visual Studio Code
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Principais dependências
 
-## Get a fresh project
+| Dependência | Finalidade |
+|---|---|
+| react | Desenvolvimento dos componentes |
+| react-native | Desenvolvimento da interface mobile |
+| expo | Ambiente de desenvolvimento |
+| expo-router | Navegação entre as telas |
+| firebase | Autenticação e banco de dados |
+| expo-camera | Leitura de QR Code |
+| @expo/vector-icons | Ícones do aplicativo |
+| expo-local-authentication | Estrutura inicial de biometria |
+| expo-secure-store | Armazenamento seguro de informações |
+| @react-native-async-storage/async-storage | Armazenamento local |
 
-When you're ready, run:
+## Pré-requisitos
 
-```bash
-npm run reset-project
-```
+Para executar o projeto, é necessário ter instalado:
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+- Node.js
+- npm
+- Git
+- Expo Go no dispositivo móvel
 
-### Other setup steps
+## Como executar o projeto
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 1. Clonar o repositório
 
-## Learn more
+    git clone https://github.com/vitorlimex/QC-APP.git
 
-To learn more about developing your project with Expo, look at the following resources:
+### 2. Acessar a pasta do projeto
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+    cd QC-APP
 
-## Join the community
+### 3. Instalar as dependências
 
-Join our community of developers creating universal apps.
+    npm ci
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Caso esteja utilizando o PowerShell e encontre problemas de permissão, utilize:
+
+    npm.cmd ci
+
+### 4. Iniciar o aplicativo
+
+    npx expo start --lan
+
+No PowerShell, caso necessário:
+
+    npx.cmd expo start --lan
+
+### 5. Executar no celular
+
+Abra o Expo Go e escaneie o QR Code apresentado pelo Expo.
+
+O computador e o celular devem estar conectados à mesma rede local. Também é necessário acesso à internet para utilizar os serviços do Firebase.
+
+## Como utilizar o aplicativo
+
+1. Realize o cadastro de uma conta.
+2. Entre utilizando o e-mail e a senha cadastrados.
+3. Na tela inicial, selecione a opção Nova Comanda.
+4. Informe o número da mesa manualmente ou através do QR Code.
+5. Selecione os produtos e suas respectivas quantidades.
+6. Confirme a criação da comanda.
+7. Acesse a comanda para visualizar o total, adicionar produtos ou encerrar o atendimento.
+
+## Testes realizados
+
+Os testes funcionais foram realizados manualmente utilizando o Expo Go em um dispositivo iOS.
+
+| Funcionalidade | Resultado |
+|---|---|
+| Cadastro de usuário | Aprovado |
+| Login com Firebase | Aprovado |
+| Mostrar e ocultar senha | Aprovado |
+| Criação de comanda manual | Aprovado |
+| Leitura de QR Code | Aprovado |
+| Seleção de produtos | Aprovado |
+| Adição de produtos à comanda | Aprovado |
+| Encerramento de comanda | Aprovado |
+| Navegação entre as telas | Aprovado |
+
+Também foi realizada a verificação do código TypeScript através do comando:
+
+    npx tsc --noEmit
+
+## Melhorias futuras
+
+- Finalizar a autenticação por biometria.
+- Configurar a persistência da sessão do Firebase.
+- Revisar as vulnerabilidades das dependências.
+- Melhorar o gerenciamento de sessões.
+- Ampliar os testes automatizados.
+
+## Desenvolvedores
+
+- Vitor Hugo Lima da Silva Fernandes
+- Caio da Silva Maciel
+- Max Leandro Rosario Gomes Junior
+- Amanda da Silva Lima
+
+## Informações acadêmicas
+
+**Instituição:** Universidade Estácio de Sá — Nova América
+
+**Curso:** Ciência da Computação, Analise e Desenvolvimento de Sistemas
+
+**Ano:** 2026
+
+Projeto desenvolvido para fins acadêmicos e de extensão, buscando solucionar uma necessidade real do comércio local.
