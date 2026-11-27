@@ -1,11 +1,14 @@
 import { useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 
 import {
@@ -51,7 +54,8 @@ export default function TelaLogin({
       // usei console.log em vez de console.error para nao ficar aquela caixinha vermelha de error da expo
       console.log(error);
 
-      let mensagemErro = "Não foi possível realizar o login. Verifique seus dados.";
+      let mensagemErro =
+        "Não foi possível realizar o login. Verifique seus dados.";
       const errorCode = error?.code;
 
       if (
@@ -68,7 +72,7 @@ export default function TelaLogin({
         mensagemErro = "Falha na conexão. Verifique sua internet.";
       }
 
-      setErro(mensagemErro); // queria colocar um texto mais amigavel de error
+      setErro(mensagemErro);
     } finally {
       setCarregando(false);
     }
@@ -94,90 +98,93 @@ export default function TelaLogin({
   }
 
   return (
-    <View style={styles.container}>
-
-      <Image
-        source={require("../../assets/images/logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#795024"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-
-      <View style={styles.containerSenha}>
-        <TextInput
-          placeholder="Senha"
-          placeholderTextColor="#795024"
-          style={[
-            styles.input,
-            { paddingRight: 50, width: "100%" },
-          ]}
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry={!mostrarSenha}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Image
+          source={require("../../assets/images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
         />
 
-        <Pressable
-          style={styles.botaoOlho}
-          onPress={() => setMostrarSenha(!mostrarSenha)}
-          accessibilityLabel={
-            mostrarSenha ? "Ocultar senha" : "Mostrar senha"
-          }
-        >
-          <Ionicons
-            name={mostrarSenha ? "eye-off" : "eye"}
-            size={24}
-            color="#795024"
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#795024"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+        />
+
+        <View style={styles.containerSenha}>
+          <TextInput
+            placeholder="Senha"
+            placeholderTextColor="#795024"
+            style={[styles.input, { paddingRight: 50, width: "100%" }]}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry={!mostrarSenha}
+            autoComplete="password"
+            textContentType="password"
           />
-        </Pressable>
-      </View>
 
-      {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
+          <Pressable
+            style={styles.botaoOlho}
+            onPress={() => setMostrarSenha(!mostrarSenha)}
+            accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+          >
+            <Ionicons
+              name={mostrarSenha ? "eye-off" : "eye"}
+              size={24}
+              color="#795024"
+            />
+          </Pressable>
+        </View>
 
-      <View style={styles.botoes}>
+        {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
 
-        {/* Botão Entrar */}
-        <Pressable
-          onPress={handleLogin}
-          disabled={carregando}
-          style={({ pressed }) => [
-            styles.botao,
-            styles.botaoEntrar,
-            pressed && styles.botaoPressionado,
-            carregando && styles.botaoDesabilitado,
-          ]}
-        >
-          <Text style={styles.textoEntrar}>
-            {carregando ? "Entrando..." : "Entrar"}
-          </Text>
-        </Pressable>
+        <View style={styles.botoes}>
+          {/* Botão Entrar */}
+          <Pressable
+            onPress={handleLogin}
+            disabled={carregando}
+            style={({ pressed }) => [
+              styles.botao,
+              styles.botaoEntrar,
+              pressed && styles.botaoPressionado,
+              carregando && styles.botaoDesabilitado,
+            ]}
+          >
+            <Text style={styles.textoEntrar}>
+              {carregando ? "Entrando..." : "Entrar"}
+            </Text>
+          </Pressable>
 
-        {/* Botão Cadastro */}
-        <Pressable
-          onPress={onCadastro}
-          disabled={carregando}
-          style={({ pressed }) => [
-            styles.botao,
-            styles.botaoCadastro,
-            pressed && styles.botaoPressionado,
-            carregando && styles.botaoDesabilitado,
-          ]}
-        >
-          <Text style={styles.textoCadastro}>
-            Cadastro
-          </Text>
-        </Pressable>
-
-      </View>
-    </View>
+          {/* Botão Cadastro */}
+          <Pressable
+            onPress={onCadastro}
+            disabled={carregando}
+            style={({ pressed }) => [
+              styles.botao,
+              styles.botaoCadastro,
+              pressed && styles.botaoPressionado,
+              carregando && styles.botaoDesabilitado,
+            ]}
+          >
+            <Text style={styles.textoCadastro}>Cadastro</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -185,9 +192,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF8E7",
+  },
+
+  scroll: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
+    paddingVertical: 32,
   },
 
   logo: {

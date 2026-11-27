@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function DetalhesComanda() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { comandas, removerComanda } = useComandas();
+  const { comandas, fecharComanda } = useComandas();
 
   const comanda = comandas.find(c => c.id === id);
 
@@ -70,7 +70,7 @@ export default function DetalhesComanda() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await removerComanda(comanda.id);
+              await fecharComanda(comanda);
               router.back();
             } catch (erro) {
               console.error(erro);

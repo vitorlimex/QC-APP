@@ -1,6 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
-import {KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View,} from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useComandas } from '../context/ComandasContext';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,25 +21,42 @@ export default function CriarComanda() {
   const [cameraAberta, setCameraAberta] = useState(false);
   const [permissao, solicitarPermissao] = useCameraPermissions();
 
+  // 🔹 Filtra a digitação: só dígitos, no máximo 2 caracteres
+  const handleMesaChange = (texto: string) => {
+    const apenasNumeros = texto.replace(/[^0-9]/g, '').slice(0, 2);
+    setMesa(apenasNumeros);
+  };
+
   const abrirModal = () => {
     if (!mesa.trim()) {
       alert('Informe o número da mesa!');
       return;
     }
 
+    const numeroMesa = parseInt(mesa, 10);
+    if (isNaN(numeroMesa) || numeroMesa < 1 || numeroMesa > 99) {
+      alert('O número da mesa deve estar entre 01 e 99!');
+      return;
+    }
+
+    // 🔹 Padroniza com 2 dígitos ANTES de usar
+    const mesaFormatada = String(numeroMesa).padStart(2, '0');
+
+    // 🔹 Normaliza o lado da comanda também, para pegar dados antigos ("7" vs "07")
     const mesaJaOcupada = comandas.some(
-      (comanda) => comanda.mesa === mesa.trim()
+      (comanda) =>
+        String(parseInt(comanda.mesa, 10)).padStart(2, '0') === mesaFormatada
     );
 
     if (mesaJaOcupada) {
-      alert(`A mesa ${mesa} já possui uma comanda aberta!`);
+      alert(`A mesa ${mesaFormatada} já possui uma comanda aberta!`);
       return;
     }
 
     router.push({
       pathname: '/selecionar_produtos',
-      params: { mesa: mesa.trim() },
-    }); 
+      params: { mesa: mesaFormatada },
+    });
   };
 
   async function abrirCamera() {
@@ -40,7 +65,7 @@ export default function CriarComanda() {
       const resultado = await solicitarPermissao();
 
       if (!resultado.granted) {
-        alert("Precisamos da permissão da câmera!");
+        alert('Precisamos da permissão da câmera!');
         return;
       }
     }
@@ -53,12 +78,8 @@ export default function CriarComanda() {
   if (cameraAberta) {
     return (
       <View style={styles.containerCamera}>
-
         <View style={styles.cabecalhoCamera}>
-          <Text style={styles.tituloCamera}>
-            Leitor de QR Code
-          </Text>
-
+          <Text style={styles.tituloCamera}>Leitor de QR Code</Text>
           <Text style={styles.subtituloCamera}>
             Aponte a câmera para o QR Code da mesa
           </Text>
@@ -68,7 +89,7 @@ export default function CriarComanda() {
           style={styles.camera}
           facing="back"
           barcodeScannerSettings={{
-            barcodeTypes: ["qr"],
+            barcodeTypes: ['qr'],
           }}
           onBarcodeScanned={({ data }) => {
             if (leituraRealizada.current) {
@@ -76,15 +97,23 @@ export default function CriarComanda() {
             }
 
             leituraRealizada.current = true;
-
             setCameraAberta(false);
 
             if (!/^\d+$/.test(data)) {
-              alert("QR Code inválido! Informe um número de mesa.");
+              alert('QR Code inválido! O QR Code deve conter apenas números.');
               return;
             }
 
-            setMesa(data);
+            const numeroMesa = parseInt(data, 10);
+            if (isNaN(numeroMesa) || numeroMesa < 1 || numeroMesa > 99) {
+              alert(
+                'QR Code inválido! O número da mesa deve estar entre 01 e 99.'
+              );
+              return;
+            }
+
+            // 🔹 Padroniza com 2 dígitos (ex.: "7" → "07")
+            setMesa(String(numeroMesa).padStart(2, '0'));
           }}
         />
 
@@ -97,56 +126,37 @@ export default function CriarComanda() {
               pressed && styles.botaoPressionado,
             ]}
           >
-            <Ionicons
-              name="close-circle-outline"
-              size={22}
-              color="#21170D"
-            />
-
-            <Text style={styles.textoPrincipal}>
-              Fechar Câmera
-            </Text>
+            <Ionicons name="close-circle-outline" size={22} color="#21170D" />
+            <Text style={styles.textoPrincipal}>Fechar Câmera</Text>
           </Pressable>
         </View>
-
       </View>
     );
   }
 
-  // Renderização da tela Nova Comanda
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.conteudo}>
+        <Ionicons name="clipboard-outline" size={52} color="#795024" />
 
-        <Ionicons
-          name="clipboard-outline"
-          size={52}
-          color="#795024"
-        />
+        <Text style={styles.titulo}>Nova Comanda</Text>
 
-        <Text style={styles.titulo}>
-          Nova Comanda
-        </Text>
-
-        <Text style={styles.subtitulo}>
-          Qual o número da mesa?
-        </Text>
+        <Text style={styles.subtitulo}>Qual o número da mesa?</Text>
 
         <TextInput
           placeholder="Ex: 01"
           placeholderTextColor="#795024"
           keyboardType="numeric"
+          maxLength={2}
           value={mesa}
-          onChangeText={setMesa}
+          onChangeText={handleMesaChange}
           style={styles.input}
         />
 
         <View style={styles.botoes}>
-
-          {/* Botão de leitura do QR Code */}
           <Pressable
             onPress={abrirCamera}
             style={({ pressed }) => [
@@ -155,18 +165,10 @@ export default function CriarComanda() {
               pressed && styles.botaoPressionado,
             ]}
           >
-            <Ionicons
-              name="qr-code-outline"
-              size={22}
-              color="#FFFFFF"
-            />
-
-            <Text style={styles.textoSecundario}>
-              Ler QR Code
-            </Text>
+            <Ionicons name="qr-code-outline" size={22} color="#FFFFFF" />
+            <Text style={styles.textoSecundario}>Ler QR Code</Text>
           </Pressable>
 
-          {/* Botão Selecionar Produtos */}
           <Pressable
             onPress={abrirModal}
             style={({ pressed }) => [
@@ -175,15 +177,8 @@ export default function CriarComanda() {
               pressed && styles.botaoPressionado,
             ]}
           >
-            <Ionicons
-              name="list-outline"
-              size={22}
-              color="#21170D"
-            />
-
-            <Text style={styles.textoPrincipal}>
-              Selecionar Produtos
-            </Text>
+            <Ionicons name="list-outline" size={22} color="#21170D" />
+            <Text style={styles.textoPrincipal}>Selecionar Produtos</Text>
           </Pressable>
 
           {/* Botão Voltar */}
@@ -195,17 +190,9 @@ export default function CriarComanda() {
               pressed && styles.botaoPressionado,
             ]}
           >
-            <Ionicons
-              name="arrow-back-outline"
-              size={22}
-              color="#795024"
-            />
-
-            <Text style={styles.textoVoltar}>
-              Voltar para a Lista
-            </Text>
+            <Ionicons name="arrow-back-outline" size={22} color="#795024" />
+            <Text style={styles.textoVoltar}>Voltar para a Lista</Text>
           </Pressable>
-
         </View>
       </View>
     </KeyboardAvoidingView>
